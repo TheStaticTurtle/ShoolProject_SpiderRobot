@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">RobotController</string>
+    <string-array name="controllerMode">
+        <item>Both</item>
+        <item>Mouvement</item>
+        <item>Camera</item>
+    </string-array>
+</resources>
