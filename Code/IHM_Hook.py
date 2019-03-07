@@ -48,7 +48,6 @@ class ClientThread(threading.Thread):
 			pass
 		self.clientsocket = None
 
-
 class ClientListenner(threading.Thread):
 	def __init__(self,port,hookThread):
 		threading.Thread.__init__(self)
@@ -85,9 +84,8 @@ def map(x,in_min,in_max,out_min,out_max):
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 class hook(threading.Thread):
-	def __init__(self, bindip, bindport, camfnc):
+	def __init__(self, bindip, bindport):
 		threading.Thread.__init__(self)
-		self.camera_setPitch , self.camera_setYaw = camfnc 
 		self.bindip = bindip
 		self.bindport = bindport
 		self.minJoystickStrenght = 50
@@ -178,6 +176,7 @@ class hook(threading.Thread):
 
 	def run(self):
 		self.listenner.start()
+
 		while self.running:
 			self.prosessQueue()
 			self.calculateMovingAction(self.walkJoystickPosition[0],self.walkJoystickPosition[1])
