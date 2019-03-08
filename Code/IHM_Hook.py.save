@@ -2,7 +2,7 @@ import random
 import sys
 import threading
 import time
-import ujson
+import json
 import socket 
 import math
 import traceback
@@ -22,9 +22,10 @@ class ClientThread(threading.Thread):
 		print("[+] Connexion de %s %s" % (self.ip, self.port, ))
 		while self.running:
 			try:
-				response = self.clientsocket.recv(9999)
+				
+				response = self.clientsocket.recv(2048)
 				if response != "":
-					print response[:-1]
+					#print response[:-1]
 					self.hookThread.addDataToQueue(response)
 			except Exception,e:
 				print e
@@ -99,10 +100,10 @@ class hook(threading.Thread):
 		self.walkJoystickPosition = (0,0)
 		self.cameraJoystickPosition = (0,0)
 		self.liveFeedUrl = "file:///android_res/raw/nofeed.html"
-		self.camera_angle_maxY = 135
-		self.camera_angle_minY = 45
-		self.camera_angle_maxX = 135
-		self.camera_angle_minX = 45
+		self.camera_angle_maxY = 90+45
+		self.camera_angle_minY = 90-45
+		self.camera_angle_maxX = 90+50
+		self.camera_angle_minX = 90-50
 		self.camera_angle = (self.camera_angle_minX,self.camera_angle_minY)
 
 	def addDataToQueue(self,data):
@@ -111,23 +112,17 @@ class hook(threading.Thread):
 	def prosessQueue(self):
 		for item in self.dataQueue:
 			try:
-				item = item[item.index("&"):item.index("$")+1]
-				if item[0] == "&" and item[-1] == "$":
-					item = item.replace("&","" ).replace("$","")
-					item = ujson.loads(item)
-					if item["action"] == "joystick":
-						if item["id"] == "controller" and item["type"] == "mouvement":
-							self.walkJoystickPosition = (item["data"]["angle"] ,item["data"]["strenght"])
-						if item["id"] == "controller" and item["type"] == "camera":
-							self.cameraJoystickPosition = (item["data"]["angle"] ,item["data"]["strenght"])
-					if item["action"] == "requestlivefeed":
-						self.setLiveFeedUrl(self.liveFeedUrl)
-				else:
-					print(item[0])
-					print(item[-1])
+				item = json.loads(item)
+				if item["action"] == "joystick":
+					if item["id"] == "controller" and item["type"] == "mouvement":
+						self.walkJoystickPosition = (item["data"]["angle"] ,item["data"]["strenght"])
+					if item["id"] == "controller" and item["type"] == "camera":
+						self.cameraJoystickPosition = (item["data"]["angle"] ,item["data"]["strenght"])
+				if item["action"] == "requestlivefeed":
+					self.setLiveFeedUrl(self.liveFeedUrl)
+
 			except Exception as e:
 				traceback.print_exc()
-				print item
 		self.dataQueue = []
 
 	def calculateMovingAction(self,angle,strengh):
@@ -201,6 +196,9 @@ class hook(threading.Thread):
 			self.prosessQueue()
 			self.calculateMovingAction(self.walkJoystickPosition[0],self.walkJoystickPosition[1])
 			self.calculateCameraAction(self.cameraJoystickPosition[0],self.cameraJoystickPosition[1])
+			self.sendKeepAlive()
+			time.sleep(.1)
+			pass
 
 
 

@@ -125,8 +125,8 @@ while True:
 			stop()
 		oldMouv = ihm.walkmode
 	if ihm.camera_angle != oldAngle:
-		camera_setPitchSmoother.goto(ihm.camera_angle[0])
+		#camera_setPitchSmoother.goto(ihm.camera_angle[0])
 		#camera_setYawSmoother.goto(ihm.camera_angle[1])
-		#camera_setPitch(ihm.camera_angle[0])
+		camera_setPitch(ihm.camera_angle[0])
 		camera_setYaw(ihm.camera_angle[1])
 		oldAngle = ihm.camera_angle
