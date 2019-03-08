@@ -16,14 +16,15 @@ class ClientThread(threading.Thread):
 		self.running=True
 		self.clientsocket.setblocking(1)
 		self.hookThread = hookThread
+		self.lastsend = time.time()
 
 	def run(self): 
 		print("[+] Connexion de %s %s" % (self.ip, self.port, ))
 		while self.running:
 			try:
-				response = self.clientsocket.recv(2048)
+				response = self.clientsocket.recv(9999)
 				if response != "":
-					#print response[:-1]
+					print response[:-1]
 					self.hookThread.addDataToQueue(response)
 			except Exception,e:
 				print e
@@ -31,13 +32,14 @@ class ClientThread(threading.Thread):
 		print("[-] Deconnexion de %s %s" % (self.ip, self.port, ))
 
 	def send(self,msg):
-		try:
-			if self.clientsocket != None:
-				self.clientsocket.send(msg)
-		except Exception,e:
-			self.close()
-			self.running=False
-			print e
+		if self.lastsend + 0.050 < time.time():
+			try:
+				if self.clientsocket != None:
+					self.clientsocket.send(msg)
+			except Exception,e:
+				self.close()
+				self.running=False
+				print e
 		
 
 	def close(self):
@@ -97,10 +99,10 @@ class hook(threading.Thread):
 		self.walkJoystickPosition = (0,0)
 		self.cameraJoystickPosition = (0,0)
 		self.liveFeedUrl = "file:///android_res/raw/nofeed.html"
-		self.camera_angle_maxY = 135
-		self.camera_angle_minY = 45
-		self.camera_angle_maxX = 180
-		self.camera_angle_minX = 0
+		self.camera_angle_maxY = 90+45
+		self.camera_angle_minY = 90-45
+		self.camera_angle_maxX = 90+50
+		self.camera_angle_minX = 90-50
 		self.camera_angle = (self.camera_angle_minX,self.camera_angle_minY)
 
 	def addDataToQueue(self,data):
@@ -120,6 +122,7 @@ class hook(threading.Thread):
 
 			except Exception as e:
 				traceback.print_exc()
+				print item
 		self.dataQueue = []
 
 	def calculateMovingAction(self,angle,strengh):
@@ -141,6 +144,18 @@ class hook(threading.Thread):
 				self.walkmode = "right"
 		if strengh<self.minJoystickStrenght:
 				self.walkmode = "stop"
+
+	def calculateCameraAction(self,angle,strenght):
+		if strenght == 0: #Avoid divde by 0
+			self.camera_angle = (self.camera_angle_maxX / 2, self.camera_angle_maxY/2)
+			return
+
+		x = math.cos( math.radians(angle) ) * strenght
+		y = math.sin( math.radians(angle) ) * strenght
+		# Here result goes from -100 to 100 So let's map it to the camera angle
+		x = int(map(x,-100,100,self.camera_angle_minX,self.camera_angle_maxX))
+		y = int(map(y,-100,100,self.camera_angle_minY,self.camera_angle_maxY))
+		self.camera_angle = (x,y)
 
 	def calculateCameraAction(self,angle,strenght):
 		#See: https://stackoverflow.com/questions/24917804/how-to-translate-joystick-angle-power-to-the-view-x-y-i-want-to-move/24927983
@@ -181,9 +196,6 @@ class hook(threading.Thread):
 			self.prosessQueue()
 			self.calculateMovingAction(self.walkJoystickPosition[0],self.walkJoystickPosition[1])
 			self.calculateCameraAction(self.cameraJoystickPosition[0],self.cameraJoystickPosition[1])
-			self.sendKeepAlive()
-			time.sleep(.1)
-			pass
 
 
 
