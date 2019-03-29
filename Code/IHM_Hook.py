@@ -32,7 +32,7 @@ class ClientThread(threading.Thread):
 		print("[-] Deconnexion de %s %s" % (self.ip, self.port, ))
 
 	def send(self,msg):
-		if self.lastsend + 0.050 < time.time():
+		if self.lastsend + 0.010 < time.time():
 			try:
 				if self.clientsocket != None:
 					self.clientsocket.send(msg)
@@ -120,6 +120,9 @@ class hook(threading.Thread):
 							self.walkJoystickPosition = (item["data"]["angle"] ,item["data"]["strenght"])
 						if item["id"] == "controller" and item["type"] == "camera":
 							self.cameraJoystickPosition = (item["data"]["angle"] ,item["data"]["strenght"])
+						if item["id"] == "controller" and item["type"] == "cameraV2":
+							self.camera_angle=(map(item["data"]["pan"],0,180,self.camera_angle_minX,self.camera_angle_maxX),map(item["data"]["tilt"],0,180,self.camera_angle_minY,self.camera_angle_maxY))
+							#self.cameraJoystickPosition = (item["data"]["angle"] ,item["data"]["strenght"])
 					if item["action"] == "requestlivefeed":
 						self.setLiveFeedUrl(self.liveFeedUrl)
 				else:
@@ -200,7 +203,7 @@ class hook(threading.Thread):
 		while self.running:
 			self.prosessQueue()
 			self.calculateMovingAction(self.walkJoystickPosition[0],self.walkJoystickPosition[1])
-			self.calculateCameraAction(self.cameraJoystickPosition[0],self.cameraJoystickPosition[1])
+			#self.calculateCameraAction(self.cameraJoystickPosition[0],self.cameraJoystickPosition[1])
 
 
 

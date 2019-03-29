@@ -127,6 +127,6 @@ while True:
 	if ihm.camera_angle != oldAngle:
 		#camera_setPitchSmoother.goto(ihm.camera_angle[0])
 		#camera_setYawSmoother.goto(ihm.camera_angle[1])
-		camera_setPitch(ihm.camera_angle[0])
-		camera_setYaw(ihm.camera_angle[1])
+		camera_setPitch(max(min(ihm.camera_angle[0],180),0))
+		camera_setYaw(max(min(ihm.camera_angle[1],180),0))
 		oldAngle = ihm.camera_angle
