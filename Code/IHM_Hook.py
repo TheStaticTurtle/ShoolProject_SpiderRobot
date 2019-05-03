@@ -103,7 +103,12 @@ class hook(threading.Thread):
 		self.camera_angle_minY = 45
 		self.camera_angle_maxX = 135
 		self.camera_angle_minX = 45
-		self.camera_angle = (self.camera_angle_minX,self.camera_angle_minY)
+
+		#self.camera_angle_maxY = 180
+		#self.camera_angle_minY = 0
+		#self.camera_angle_maxX = 180
+		#self.camera_angle_minX = 0
+		self.camera_angle = (self.camera_angle_maxX/2,self.camera_angle_maxY/2)
 
 	def addDataToQueue(self,data):
 		self.dataQueue.append(data)
