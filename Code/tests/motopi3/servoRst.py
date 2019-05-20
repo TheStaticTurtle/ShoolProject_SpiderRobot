@@ -39,6 +39,6 @@ for chan in range(0,12):
 
 while True:
 	j = input("angle: ")
-	for chan in servosFemur:
+	for chan in servosTibia:
 		i = map(j,0,180,150,600)
 		pwm.set_pwm(chan, 0, i)
